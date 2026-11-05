@@ -1,59 +1,116 @@
-# Movies
+# Well Fair TMDb — Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.29.
+Aplicación web de consulta de películas construida con **Angular 21** y **Angular Material**, que consume el backend propio (Spring Boot 4.1.2) como proxy hacia la API pública de [The Movie Database (TMDb)](https://www.themoviedb.org/).
 
-## Development server
+---
 
-To start a local development server, run:
+## Tecnologías
+
+| Tecnología | Versión | Rol |
+|------------|---------|-----|
+| Angular | 21 | Framework SPA principal |
+| Angular Material | 21 | Componentes UI (cards, dialogs, paginator, chips) |
+| Angular CLI | 21.2.29 | Scaffolding, servidor de desarrollo y build |
+
+No se usa ninguna librería de terceros más allá del ecosistema Angular. Sin Redux, sin NgRx, sin librerías de componentes externas.
+
+---
+## Arquitectura del proyecto
+
+El proyecto sigue la guía de estilos oficial de Angular con una estructura **feature-based**:
+
+```
+src/app/
+├── core/                   ← Singletons globales
+│   ├── interceptors/       ← Manejo centralizado de errores HTTP
+│   ├── models/             ← Interfaces TypeScript
+│   └── services/           ← Lógica de negocio y llamadas HTTP
+│
+├── shared/                 ← Componentes y pipes reutilizables
+│   ├── components/
+│   │   ├── movie-card/            ← Tarjeta de película
+│   │   ├── movie-detail-modal/    ← Modal de detalle completo
+│   │   ├── loading-skeleton/      ← Skeleton animado de carga
+│   │   └── empty-state/           ← Pantalla de "sin resultados"
+│   └── pipes/
+│       └── rating-color.pipe.ts   ← Color dinámico por calificación(como en sitios de películas)
+│
+├── features/               ← Pantallas (lazy loaded)
+│   ├── home/               ← Popular + búsqueda + filtro por género
+│   ├── top-rated/          ← Mejor calificadas
+│   └── favorites/          ← Favoritos (localStorage)
+│
+├── layout/                 ← Navbar y footer globales
+│   ├── navbar/
+│   └── footer/
+│
+├── app.component.ts
+├── app.config.ts
+└── app.routes.ts
+```
+---
+
+## Requisitos previos
+
+- **Node.js 20+** — [descargar](https://nodejs.org/)
+- **npm 10+** (incluido con Node)
+- **Angular CLI 21**
+- **Backend corriendo** en `http://localhost:8080`
+
+Verifica versiones:
+```bash
+node -v   # >= 20
+npm -v    # >= 10
+ng version
+```
+
+---
+
+## Instalación y ejecución
+
+### 1. Clona e instala dependencias
+
+```bash
+git clone
+npm install
+```
+
+### 2. Configura la URL del backend
+
+El archivo `src/environments/environment.dev.ts` apunta al backend por defecto:
+
+```ts
+export const environment = {
+  production: false,
+  apiBaseUrl: 'http://localhost:8080/v1'
+};
+```
+
+Si tu backend corre en otro puerto, edita `apiBaseUrl` antes de levantar.
+
+### 3. Levanta el servidor de desarrollo
 
 ```bash
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Abre el navegador en `http://localhost:4200/`.  
+La app recarga automáticamente al guardar cualquier archivo.
 
-## Code scaffolding
+> ⚠️ **El backend debe estar corriendo antes de levantar el frontend.** Si el backend no responde, la app mostrará un snackbar de error de conexión.
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+---
 
-```bash
-ng generate component component-name
-```
+## Conexión con el backend
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Toda comunicación HTTP pasa por `MovieService` (`core/services/movie.service.ts`). La URL base se toma del archivo `environment.ts`, por lo que cambiar de ambiente no requiere modificar ningún servicio.
 
-```bash
-ng generate --help
-```
+| Variable | Desarrollo |
+|----------|-----------|
+| `apiBaseUrl` | `http://localhost:8080/v1` 
 
-## Building
+No hay tokens ni credenciales en el frontend — la autenticación hacia TMDb es responsabilidad exclusiva del backend.
 
-To build the project run:
+---
 
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+*Desarrollado por [Irvin G.C.] — Prueba técnica Well Fair, noviembre 2026.*
